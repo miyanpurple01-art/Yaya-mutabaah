@@ -112,12 +112,24 @@ canvas{
 </div>
 
 <script>
-let ramadhanStart = new Date("March 19, 2026"); 
 let todayDate = new Date();
-let today = todayDate.getDate();
-let ramadhanDayCount = Math.floor((todayDate - ramadhanStart) / (1000*60*60*24)) + 1;
 
-if(ramadhanDayCount < 1) ramadhanDayCount = 0;
+let hijriFormatter = new Intl.DateTimeFormat('id-TN-u-ca-islamic', {
+  day: 'numeric',
+  month: 'numeric',
+  year: 'numeric'
+});
+
+let hijriParts = hijriFormatter.formatToParts(todayDate);
+
+let hijriDay = hijriParts.find(p => p.type === 'day').value;
+let hijriMonth = hijriParts.find(p => p.type === 'month').value;
+
+let ramadhanDayCount = 0;
+
+if (hijriMonth == 9) {
+  ramadhanDayCount = parseInt(hijriDay);
+}
 
 let mode=localStorage.getItem("mode")||"normal";
 let target=localStorage.getItem("target")||90;
@@ -274,4 +286,5 @@ drawChart();
 </script>
 
 </body>
+
 </html>
