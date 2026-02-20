@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mutaba'ah Muslimah Elite - Yaya</title>
+<title>Mutaba'ah Muslimah - Yaya</title>
 
 <style>
 body{
@@ -74,7 +74,7 @@ canvas{
 
 <body>
 
-<h2>🌙 Mutaba'ah Muslimah Elite - Yaya</h2>
+<h2>🌙 Mutaba'ah Muslimah - Yaya</h2>
 
 <div class="card">
 <p id="dateMasehi"></p>
@@ -114,16 +114,43 @@ canvas{
 <script>
 let todayDate = new Date();
 
-let hijriFormatter = new Intl.DateTimeFormat('id-TN-u-ca-islamic', {
-  day: 'numeric',
-  month: 'numeric',
-  year: 'numeric'
+const today = new Date();
+
+const hijriFormatter = new Intl.DateTimeFormat("en-TN-u-ca-islamic", {
+  day: "numeric",
+  month: "numeric",
+  year: "numeric"
 });
 
-let hijriParts = hijriFormatter.formatToParts(todayDate);
+const parts = hijriFormatter.formatToParts(today);
 
-let hijriDay = hijriParts.find(p => p.type === 'day').value;
-let hijriMonth = hijriParts.find(p => p.type === 'month').value;
+let hijriDay, hijriMonth, hijriYear;
+
+parts.forEach(part => {
+  if (part.type === "day") hijriDay = part.value;
+  if (part.type === "month") hijriMonth = part.value;
+  if (part.type === "year") hijriYear = part.value;
+});
+
+const hijriMonths = [
+  "Muharram",
+  "Safar",
+  "Rabiul Awal",
+  "Rabiul Akhir",
+  "Jumadil Awal",
+  "Jumadil Akhir",
+  "Rajab",
+  "Sya'ban",
+  "Ramadhan",
+  "Syawal",
+  "Dzulqa'dah",
+  "Dzulhijjah"
+];
+
+let monthName = hijriMonths[parseInt(hijriMonth) - 1];
+
+document.getElementById("hijriDate").innerText =
+  "🌙 " + hijriDay + " " + monthName + " " + hijriYear + " H";
 
 let ramadhanDayCount = 0;
 
@@ -288,4 +315,5 @@ drawChart();
 </body>
 
 </html>
+
 
