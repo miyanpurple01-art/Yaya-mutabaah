@@ -206,6 +206,7 @@ container.innerHTML="";
 document.getElementById("total").innerText=0;
 
 activitiesData[mode].forEach(act=>{
+activitiesData[mode].forEach(act=>{
 let div=document.createElement("div");
 div.innerHTML=`
 <label>
@@ -216,6 +217,7 @@ ${act.name} (${act.minutes} menit)
 </label>`;
 container.appendChild(div);
 });
+}
 
 function handleCheck(name,minutes){
 if(checked.includes(name)){
@@ -332,6 +334,7 @@ drawChart();
 </body>
 
 </html>
+
 
 
 
