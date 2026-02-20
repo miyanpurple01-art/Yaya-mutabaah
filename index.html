@@ -153,8 +153,13 @@ let monthName = hijriMonths[parseInt(hijriMonth) - 1];
 
 let ramadhanDayCount = 0;
 
+// OFFSET -1 agar sesuai kalender Indonesia
+let correctedHijriDay = parseInt(hijriDay) - 1;
+
+if (correctedHijriDay < 1) correctedHijriDay = 1;
+
 if (hijriMonth == 9) {
-  ramadhanDayCount = parseInt(hijriDay) - 1;
+  ramadhanDayCount = correctedHijriDay;
 }
 
 let mode=localStorage.getItem("mode")||"normal";
@@ -290,11 +295,11 @@ function showDates(){
 
   // 🌙 Tanggal Hijriyah (manual agar tidak muncul September)
   document.getElementById("dateHijri").innerText =
-    "🌙 " + hijriDay + " " + monthName + " " + hijriYear + " H";
+    "🌙 " + correctedHijriDay + " " + monthName + " " + hijriYear + " H";
 
   // ✨ Hari Ramadhan
   document.getElementById("ramadhanDay").innerText =
-    hijriMonth == 9 ? "✨ Ramadhan Hari ke-" + hijriDay : "";
+    hijriMonth == 9 ? "✨ Ramadhan Hari ke-" + correctedHijriDay : "";
 
 }
 
@@ -324,6 +329,7 @@ drawChart();
 </body>
 
 </html>
+
 
 
 
