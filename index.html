@@ -1,143 +1,315 @@
 <!DOCTYPE html>
-<html lang="id">
+<html>
 <head>
-<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mutaba'ah Muslimah - Yaya</title>
+<title>Mutaba'ah Muslimah - Yaya 🤍</title>
 
 <style>
-body {
-  font-family: Arial, sans-serif;
-  margin: 0;
-  background: linear-gradient(to bottom, #f3d9e8, #d8e6f2);
-  text-align: center;
+body{
+  font-family:'Poppins',sans-serif;
+  background: linear-gradient(to bottom,#F8F4EC,#E6F0EB);
+  padding:15px;
+  color:#444;
+}
+h2{ color:#7A9D8E; }
+
+.card{
+  background:white;
+  padding:15px;
+  border-radius:20px;
+  margin-bottom:15px;
+  box-shadow:0 6px 15px rgba(0,0,0,0.08);
 }
 
-h1 {
-  padding: 20px;
-  color: #6a4c93;
+button{
+  background:#7A9D8E;
+  color:white;
+  border:none;
+  padding:8px 12px;
+  border-radius:12px;
+  margin-top:5px;
 }
 
-.card {
-  background: white;
-  margin: 20px;
-  padding: 20px;
-  border-radius: 20px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+.progress{
+  height:12px;
+  background:#ddd;
+  border-radius:10px;
+  margin:10px 0;
+}
+.progress-bar{
+  height:12px;
+  background:#7A9D8E;
+  border-radius:10px;
+  width:0%;
 }
 
-button {
-  background: #6a4c93;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 10px;
-  margin-top: 10px;
-  cursor: pointer;
+.calendar{
+  display:grid;
+  grid-template-columns:repeat(6,1fr);
+  gap:6px;
+}
+.day{
+  background:white;
+  padding:6px;
+  border-radius:10px;
+  text-align:center;
+  font-size:12px;
+}
+.completed{
+  background:#7A9D8E;
+  color:white;
+}
+.today{
+  border:2px solid #7A9D8E;
 }
 
-.progress-bar {
-  width: 100%;
-  background: #eee;
-  height: 20px;
-  border-radius: 10px;
-  margin-top: 10px;
+canvas{
+  background:white;
+  border-radius:15px;
+  margin-top:10px;
 }
 
-.progress {
-  height: 100%;
-  background: #6a4c93;
-  border-radius: 10px;
-  width: 0%;
+.motivation{
+  font-style:italic;
+  color:#7A9D8E;
 }
 </style>
 </head>
 
 <body>
 
-<h1>🌙 Mutaba'ah Muslimah - Yaya</h1>
+<h2>🌙 Mutaba'ah Muslimah - Yaya 🤍</h2>
 
 <div class="card">
-  <h2 id="tanggalHijriyah"></h2>
+<p id="dateMasehi"></p>
+<p id="dateHijri"></p>
+<p id="ramadhanDay"></p>
+<p class="motivation" id="motivation"></p>
 </div>
 
 <div class="card">
-  <h2>Total Ibadah Hari Ini</h2>
-  <p id="totalMenit">0 menit</p>
-  <div class="progress-bar">
-    <div class="progress" id="progressBar"></div>
-  </div>
+<button onclick="toggleMode()">Ganti Mode</button>
+<p id="modeText"></p>
+
+<label>Target menit:</label>
+<input type="number" id="targetInput" style="width:60px;">
+<button onclick="saveTarget()">Simpan</button>
+
+<div class="progress">
+<div class="progress-bar" id="progressBar"></div>
+</div>
+
+<p>Total Hari Ini: <span id="total">0</span> menit</p>
+<div id="activities"></div>
 </div>
 
 <div class="card">
-  <h3>Checklist Ibadah</h3>
+<h3>📊 Grafik Ibadah</h3>
+<canvas id="chart" width="320" height="150"></canvas>
+</div>
 
-  <label><input type="checkbox" value="20"> Murottal (20 menit)</label><br>
-  <label><input type="checkbox" value="20"> Terjemahan (20 menit)</label><br>
-  <label><input type="checkbox" value="10"> Dzikir (10 menit)</label><br>
-  <label><input type="checkbox" value="20"> Buku Islami (20 menit)</label><br>
-  <label><input type="checkbox" value="20"> Ceramah (20 menit)</label><br>
-
-  <button onclick="simpanData()">Simpan Hari Ini</button>
+<div class="card">
+<h3>📅 Kalender Ramadhan</h3>
+<div class="calendar" id="calendar"></div>
 </div>
 
 <script>
-// =======================
-// FIX RAMADHAN HARI KE 2
-// =======================
-document.getElementById("tanggalHijriyah").innerHTML = 
-  "2 Ramadhan 1447 H";
 
-// =======================
-// LOAD DATA
-// =======================
-function loadData() {
-  const saved = localStorage.getItem("mutabaahData");
-  if (saved) {
-    const data = JSON.parse(saved);
-    document.querySelectorAll("input[type=checkbox]").forEach((box, i) => {
-      box.checked = data.checklist[i];
-    });
-  }
-  hitungTotal();
+/* ===========================
+   DATE SYSTEM
+=========================== */
+
+let todayDate = new Date();
+
+const hijriFormatter = new Intl.DateTimeFormat("en-TN-u-ca-islamic",{
+  day:"numeric", month:"numeric", year:"numeric"
+});
+
+const parts = hijriFormatter.formatToParts(todayDate);
+
+let hijriDay, hijriMonth, hijriYear;
+
+parts.forEach(p=>{
+  if(p.type==="day") hijriDay=p.value;
+  if(p.type==="month") hijriMonth=p.value;
+  if(p.type==="year") hijriYear=p.value;
+});
+
+const hijriMonths=[
+"Muharram","Safar","Rabiul Awal","Rabiul Akhir",
+"Jumadil Awal","Jumadil Akhir","Rajab","Sya'ban",
+"Ramadhan","Syawal","Dzulqa'dah","Dzulhijjah"
+];
+
+let correctedHijriDay = parseInt(hijriDay)-1;
+if(correctedHijriDay<1) correctedHijriDay=1;
+
+let monthName=hijriMonths[parseInt(hijriMonth)-1];
+let ramadhanDay = hijriMonth==9 ? correctedHijriDay : 0;
+
+/* ===========================
+   STORAGE
+=========================== */
+
+let mode=localStorage.getItem("mode")||"normal";
+let target=parseInt(localStorage.getItem("target"))||90;
+let data=JSON.parse(localStorage.getItem("ramadhanData"))||{};
+let checked=JSON.parse(localStorage.getItem("checkedData_"+ramadhanDay))||[];
+
+document.getElementById("targetInput").value=target;
+
+/* ===========================
+   ACTIVITIES
+=========================== */
+
+let activitiesData={
+normal:[
+{name:"Qiyamul Lail",minutes:20},
+{name:"Tilawah",minutes:30},
+{name:"Dhuha",minutes:10},
+{name:"Dzikir",minutes:10},
+{name:"Buku Islami",minutes:20},
+{name:"Ceramah",minutes:20}
+],
+haidh:[
+{name:"Murottal",minutes:20},
+{name:"Terjemahan",minutes:20},
+{name:"Dzikir",minutes:10},
+{name:"Buku Islami",minutes:20},
+{name:"Ceramah",minutes:20}
+]
+};
+
+function renderActivities(){
+document.getElementById("modeText").innerText="Mode: "+mode;
+let container=document.getElementById("activities");
+container.innerHTML="";
+
+activitiesData[mode].forEach(act=>{
+let div=document.createElement("div");
+div.innerHTML=`
+<label>
+<input type="checkbox"
+${checked.includes(act.name)?"checked":""}
+onchange="handleCheck('${act.name}',${act.minutes})">
+${act.name} (${act.minutes} menit)
+</label>`;
+container.appendChild(div);
+});
+updateStats();
 }
 
-// =======================
-// SIMPAN DATA
-// =======================
-function simpanData() {
-  let checklistStatus = [];
-  document.querySelectorAll("input[type=checkbox]").forEach(box => {
-    checklistStatus.push(box.checked);
-  });
-
-  localStorage.setItem("mutabaahData", JSON.stringify({
-    checklist: checklistStatus
-  }));
-
-  hitungTotal();
+function handleCheck(name,minutes){
+if(checked.includes(name)){
+checked=checked.filter(a=>a!==name);
+}else{
+checked.push(name);
+}
+localStorage.setItem("checkedData_"+ramadhanDay,JSON.stringify(checked));
+updateStats();
 }
 
-// =======================
-// HITUNG TOTAL
-// =======================
-function hitungTotal() {
-  let total = 0;
-  document.querySelectorAll("input[type=checkbox]").forEach(box => {
-    if (box.checked) {
-      total += parseInt(box.value);
-    }
-  });
-
-  document.getElementById("totalMenit").innerHTML = total + " menit";
-
-  let persen = (total / 90) * 100;
-  document.getElementById("progressBar").style.width = persen + "%";
+function updateStats(){
+let total=0;
+activitiesData[mode].forEach(act=>{
+if(checked.includes(act.name)) total+=act.minutes;
+});
+document.getElementById("total").innerText=total;
+document.getElementById("progressBar").style.width=(total/target*100)+"%";
+data[ramadhanDay]=total;
+localStorage.setItem("ramadhanData",JSON.stringify(data));
+renderCalendar();
+drawChart();
 }
 
-// =======================
-loadData();
+function toggleMode(){
+mode=mode==="normal"?"haidh":"normal";
+localStorage.setItem("mode",mode);
+checked=[];
+localStorage.removeItem("checkedData_"+ramadhanDay);
+renderActivities();
+}
+
+function saveTarget(){
+target=parseInt(document.getElementById("targetInput").value);
+localStorage.setItem("target",target);
+alert("Target disimpan 🤍");
+}
+
+/* ===========================
+   CALENDAR
+=========================== */
+
+function renderCalendar(){
+let cal=document.getElementById("calendar");
+cal.innerHTML="";
+for(let i=1;i<=30;i++){
+let div=document.createElement("div");
+div.className="day";
+div.innerText=i;
+if(data[i]>=target) div.classList.add("completed");
+if(i===ramadhanDay) div.classList.add("today");
+cal.appendChild(div);
+}
+}
+
+/* ===========================
+   GRAPH
+=========================== */
+
+function drawChart(){
+let canvas=document.getElementById("chart");
+let ctx=canvas.getContext("2d");
+ctx.clearRect(0,0,320,150);
+ctx.beginPath();
+ctx.moveTo(0,150);
+for(let i=1;i<=30;i++){
+let y=150-(data[i]||0);
+ctx.lineTo(i*10,y);
+}
+ctx.strokeStyle="#7A9D8E";
+ctx.stroke();
+}
+
+/* ===========================
+   SHOW DATES
+=========================== */
+
+function showDates(){
+document.getElementById("dateMasehi").innerText=
+"📅 "+todayDate.toLocaleDateString("id-ID",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+
+document.getElementById("dateHijri").innerText=
+"🌙 "+correctedHijriDay+" "+monthName+" "+hijriYear+" H";
+
+document.getElementById("ramadhanDay").innerText=
+ramadhanDay>0?"✨ Ramadhan Hari ke-"+ramadhanDay:"";
+}
+
+/* ===========================
+   MOTIVATION
+=========================== */
+
+let motivations=[
+"Allah melihat setiap usaha kecilmu 🤍",
+"Istiqamah lebih dicintai daripada banyak tapi jarang.",
+"Ramadhan adalah kesempatan emas.",
+"Satu ayat hari ini lebih baik daripada nol.",
+"Perbaiki hari ini, bukan menunggu sempurna."
+];
+
+document.getElementById("motivation").innerText=
+motivations[Math.floor(Math.random()*motivations.length)];
+
+/* ===========================
+   INIT
+=========================== */
+
+showDates();
+renderActivities();
+renderCalendar();
+drawChart();
+
 </script>
-
 </body>
 </html>
