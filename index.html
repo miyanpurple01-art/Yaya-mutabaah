@@ -196,25 +196,26 @@ let motivations=[
 document.getElementById("motivation").innerText=
 motivations[Math.floor(Math.random()*motivations.length)];
 
-let checked=[];
+let checked = JSON.parse(localStorage.getItem("checkedData")) || [];
 
 function renderActivities(){
 document.getElementById("modeText").innerText="Mode: "+mode;
 const container=document.getElementById("activities");
 container.innerHTML="";
-checked=[];
+
 document.getElementById("total").innerText=0;
 
 activitiesData[mode].forEach(act=>{
 let div=document.createElement("div");
 div.innerHTML=`
 <label>
-<input type="checkbox" onchange="handleCheck('${act.name}',${act.minutes})">
+<input type="checkbox"
+${checked.includes(act.name) ? "checked" : ""}
+onchange="handleCheck('${act.name}',${act.minutes})">
 ${act.name} (${act.minutes} menit)
 </label>`;
 container.appendChild(div);
 });
-}
 
 function handleCheck(name,minutes){
 if(checked.includes(name)){
@@ -222,6 +223,8 @@ checked=checked.filter(a=>a!==name);
 }else{
 checked.push(name);
 }
+
+localStorage.setItem("checkedData", JSON.stringify(checked));
 updateStats();
 }
 
@@ -329,6 +332,7 @@ drawChart();
 </body>
 
 </html>
+
 
 
 
