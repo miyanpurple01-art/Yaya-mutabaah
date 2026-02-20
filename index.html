@@ -128,7 +128,7 @@ let hijriMonth = hijriParts.find(p => p.type === 'month').value;
 let ramadhanDayCount = 0;
 
 if (hijriMonth == 9) {
-  ramadhanDayCount = parseInt(hijriDay);
+  ramadhanDayCount = parseInt(hijriDay) - 1;
 }
 
 let mode=localStorage.getItem("mode")||"normal";
@@ -288,3 +288,4 @@ drawChart();
 </body>
 
 </html>
+
