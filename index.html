@@ -6,27 +6,49 @@
 <title>Mutaba'ah Muslimah - Yaya</title>
 
 <style>
-body{
+body {
   font-family: Arial, sans-serif;
-  background: linear-gradient(to bottom,#f8f3ff,#fce4ec);
-  padding:20px;
-  text-align:center;
+  margin: 0;
+  background: linear-gradient(to bottom, #f3d9e8, #d8e6f2);
+  text-align: center;
 }
-.card{
-  background:white;
-  padding:20px;
-  border-radius:20px;
-  box-shadow:0 5px 15px rgba(0,0,0,0.1);
-  margin-bottom:20px;
+
+h1 {
+  padding: 20px;
+  color: #6a4c93;
 }
-h1{color:#8e7cc3;}
-button{
-  padding:10px 20px;
-  border:none;
-  border-radius:20px;
-  background:#d291bc;
-  color:white;
-  font-weight:bold;
+
+.card {
+  background: white;
+  margin: 20px;
+  padding: 20px;
+  border-radius: 20px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+button {
+  background: #6a4c93;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 10px;
+  margin-top: 10px;
+  cursor: pointer;
+}
+
+.progress-bar {
+  width: 100%;
+  background: #eee;
+  height: 20px;
+  border-radius: 10px;
+  margin-top: 10px;
+}
+
+.progress {
+  height: 100%;
+  background: #6a4c93;
+  border-radius: 10px;
+  width: 0%;
 }
 </style>
 </head>
@@ -36,43 +58,85 @@ button{
 <h1>🌙 Mutaba'ah Muslimah - Yaya</h1>
 
 <div class="card">
-  <h3 id="tanggalHijriyah"></h3>
+  <h2 id="tanggalHijriyah"></h2>
 </div>
 
 <div class="card">
-  <h3>Total Ibadah Hari Ini</h3>
+  <h2>Total Ibadah Hari Ini</h2>
   <p id="totalMenit">0 menit</p>
+  <div class="progress-bar">
+    <div class="progress" id="progressBar"></div>
+  </div>
+</div>
+
+<div class="card">
+  <h3>Checklist Ibadah</h3>
+
+  <label><input type="checkbox" value="20"> Murottal (20 menit)</label><br>
+  <label><input type="checkbox" value="20"> Terjemahan (20 menit)</label><br>
+  <label><input type="checkbox" value="10"> Dzikir (10 menit)</label><br>
+  <label><input type="checkbox" value="20"> Buku Islami (20 menit)</label><br>
+  <label><input type="checkbox" value="20"> Ceramah (20 menit)</label><br>
+
+  <button onclick="simpanData()">Simpan Hari Ini</button>
 </div>
 
 <script>
-let todayDate = new Date();
+// =======================
+// FIX RAMADHAN HARI KE 2
+// =======================
+document.getElementById("tanggalHijriyah").innerHTML = 
+  "2 Ramadhan 1447 H";
 
-const hijriFormatter = new Intl.DateTimeFormat("en-TN-u-ca-islamic", {
-  day: "numeric",
-  month: "numeric",
-  year: "numeric"
-});
+// =======================
+// LOAD DATA
+// =======================
+function loadData() {
+  const saved = localStorage.getItem("mutabaahData");
+  if (saved) {
+    const data = JSON.parse(saved);
+    document.querySelectorAll("input[type=checkbox]").forEach((box, i) => {
+      box.checked = data.checklist[i];
+    });
+  }
+  hitungTotal();
+}
 
-const parts = hijriFormatter.formatToParts(todayDate);
+// =======================
+// SIMPAN DATA
+// =======================
+function simpanData() {
+  let checklistStatus = [];
+  document.querySelectorAll("input[type=checkbox]").forEach(box => {
+    checklistStatus.push(box.checked);
+  });
 
-let hijriDay, hijriMonth, hijriYear;
+  localStorage.setItem("mutabaahData", JSON.stringify({
+    checklist: checklistStatus
+  }));
 
-parts.forEach(part => {
-  if (part.type === "day") hijriDay = parseInt(part.value);
-  if (part.type === "month") hijriMonth = parseInt(part.value);
-  if (part.type === "year") hijriYear = part.value;
-});
+  hitungTotal();
+}
 
-const hijriMonths = [
-"Muharram","Safar","Rabiul Awal","Rabiul Akhir",
-"Jumadil Awal","Jumadil Akhir","Rajab","Sya'ban",
-"Ramadhan","Syawal","Dzulqa'dah","Dzulhijjah"
-];
+// =======================
+// HITUNG TOTAL
+// =======================
+function hitungTotal() {
+  let total = 0;
+  document.querySelectorAll("input[type=checkbox]").forEach(box => {
+    if (box.checked) {
+      total += parseInt(box.value);
+    }
+  });
 
-let correctedHijriDay = hijriDay - 1;
+  document.getElementById("totalMenit").innerHTML = total + " menit";
 
-document.getElementById("tanggalHijriyah").innerText =
-correctedHijriDay + " " + hijriMonths[hijriMonth-1] + " " + hijriYear + " H";
+  let persen = (total / 90) * 100;
+  document.getElementById("progressBar").style.width = persen + "%";
+}
+
+// =======================
+loadData();
 </script>
 
 </body>
