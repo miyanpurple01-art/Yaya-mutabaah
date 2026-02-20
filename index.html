@@ -107,7 +107,7 @@ canvas{
 </div>
 
 <div class="card">
-<h3>📅 Kalender Ramadhan</h3>
+<h2>📅 Kalender Ramadhan</h2>
 <div class="calendar" id="calendar"></div>
 </div>
 
@@ -149,8 +149,7 @@ const hijriMonths = [
 
 let monthName = hijriMonths[parseInt(hijriMonth) - 1];
 
-document.getElementById("hijriDate").innerText =
-  "🌙 " + hijriDay + " " + monthName + " " + hijriYear + " H";
+
 
 let ramadhanDayCount = 0;
 
@@ -279,14 +278,24 @@ ctx.stroke();
 }
 
 function showDates(){
-document.getElementById("dateMasehi").innerText=
-"📅 "+todayDate.toLocaleDateString("id-ID",{weekday:"long", day:"numeric", month:"long", year:"numeric"});
 
-let hijri=todayDate.toLocaleDateString("id-TN-u-ca-islamic",{day:"numeric",month:"long",year:"numeric"});
-document.getElementById("dateHijri").innerText="🌙 "+hijri+" H";
+  // 📅 Tanggal Masehi
+  document.getElementById("dateMasehi").innerText =
+    "📅 " + todayDate.toLocaleDateString("id-ID",{
+      weekday:"long",
+      day:"numeric",
+      month:"long",
+      year:"numeric"
+    });
 
-document.getElementById("ramadhanDay").innerText=
-ramadhanDayCount>0 ? "✨ Ramadhan Hari ke-"+ramadhanDayCount : "";
+  // 🌙 Tanggal Hijriyah (manual agar tidak muncul September)
+  document.getElementById("dateHijri").innerText =
+    "🌙 " + hijriDay + " " + monthName + " " + hijriYear + " H";
+
+  // ✨ Hari Ramadhan
+  document.getElementById("ramadhanDay").innerText =
+    hijriMonth == 9 ? "✨ Ramadhan Hari ke-" + hijriDay : "";
+
 }
 
 function requestNotif(){
@@ -315,5 +324,6 @@ drawChart();
 </body>
 
 </html>
+
 
 
