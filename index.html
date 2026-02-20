@@ -1,10 +1,52 @@
-<script>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mutaba'ah Muslimah - Yaya</title>
 
+<style>
+body{
+  font-family: Arial, sans-serif;
+  background: linear-gradient(to bottom,#f8f3ff,#fce4ec);
+  padding:20px;
+  text-align:center;
+}
+.card{
+  background:white;
+  padding:20px;
+  border-radius:20px;
+  box-shadow:0 5px 15px rgba(0,0,0,0.1);
+  margin-bottom:20px;
+}
+h1{color:#8e7cc3;}
+button{
+  padding:10px 20px;
+  border:none;
+  border-radius:20px;
+  background:#d291bc;
+  color:white;
+  font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+
+<h1>🌙 Mutaba'ah Muslimah - Yaya</h1>
+
+<div class="card">
+  <h3 id="tanggalHijriyah"></h3>
+</div>
+
+<div class="card">
+  <h3>Total Ibadah Hari Ini</h3>
+  <p id="totalMenit">0 menit</p>
+</div>
+
+<script>
 let todayDate = new Date();
 
-// ===============================
-// HIJRI DATE
-// ===============================
 const hijriFormatter = new Intl.DateTimeFormat("en-TN-u-ca-islamic", {
   day: "numeric",
   month: "numeric",
@@ -22,189 +64,16 @@ parts.forEach(part => {
 });
 
 const hijriMonths = [
-  "Muharram","Safar","Rabiul Awal","Rabiul Akhir",
-  "Jumadil Awal","Jumadil Akhir","Rajab","Sya'ban",
-  "Ramadhan","Syawal","Dzulqa'dah","Dzulhijjah"
+"Muharram","Safar","Rabiul Awal","Rabiul Akhir",
+"Jumadil Awal","Jumadil Akhir","Rajab","Sya'ban",
+"Ramadhan","Syawal","Dzulqa'dah","Dzulhijjah"
 ];
 
 let correctedHijriDay = hijriDay - 1;
-if(correctedHijriDay < 1) correctedHijriDay = 1;
 
-let ramadhanDayCount = (hijriMonth === 9) ? correctedHijriDay : 0;
+document.getElementById("tanggalHijriyah").innerText =
+correctedHijriDay + " " + hijriMonths[hijriMonth-1] + " " + hijriYear + " H";
+</script>
 
-// ===============================
-// DATA STORAGE
-// ===============================
-let mode = localStorage.getItem("mode") || "normal";
-let target = parseInt(localStorage.getItem("target")) || 90;
-let data = JSON.parse(localStorage.getItem("ramadhanData")) || {};
-let checked = JSON.parse(localStorage.getItem("checkedData")) || [];
-
-document.getElementById("targetInput").value = target;
-
-// ===============================
-// ACTIVITIES
-// ===============================
-let activitiesData = {
-  normal:[
-    {name:"Qiyamul Lail",minutes:20},
-    {name:"Tilawah",minutes:30},
-    {name:"Dhuha",minutes:10},
-    {name:"Dzikir",minutes:10},
-    {name:"Buku Islami",minutes:20},
-    {name:"Ceramah",minutes:20}
-  ],
-  haidh:[
-    {name:"Murottal",minutes:20},
-    {name:"Terjemahan",minutes:20},
-    {name:"Dzikir",minutes:10},
-    {name:"Buku Islami",minutes:20},
-    {name:"Ceramah",minutes:20}
-  ]
-};
-
-// ===============================
-// MOTIVATION
-// ===============================
-let motivations=[
-"Allah melihat setiap usaha kecilmu 🤍",
-"Istiqamah lebih dicintai daripada banyak tapi jarang.",
-"Ramadhan adalah kesempatan emas.",
-"Satu ayat hari ini lebih baik daripada nol.",
-"Perbaiki hari ini, bukan menunggu sempurna."
-];
-
-document.getElementById("motivation").innerText =
-motivations[Math.floor(Math.random()*motivations.length)];
-
-// ===============================
-// RENDER ACTIVITIES
-// ===============================
-function renderActivities(){
-  document.getElementById("modeText").innerText="Mode: "+mode;
-
-  const container=document.getElementById("activities");
-  container.innerHTML="";
-
-  activitiesData[mode].forEach(act=>{
-    let div=document.createElement("div");
-    div.innerHTML=`
-      <label>
-      <input type="checkbox"
-      ${checked.includes(act.name) ? "checked" : ""}
-      onchange="handleCheck('${act.name}',${act.minutes})">
-      ${act.name} (${act.minutes} menit)
-      </label>`;
-    container.appendChild(div);
-  });
-
-  updateStats();
-}
-
-// ===============================
-// HANDLE CHECK
-// ===============================
-function handleCheck(name){
-  if(checked.includes(name)){
-    checked = checked.filter(a=>a!==name);
-  }else{
-    checked.push(name);
-  }
-
-  localStorage.setItem("checkedData",JSON.stringify(checked));
-  updateStats();
-}
-
-// ===============================
-// UPDATE PROGRESS
-// ===============================
-function updateStats(){
-  let total = 0;
-
-  activitiesData[mode].forEach(act=>{
-    if(checked.includes(act.name)) total += act.minutes;
-  });
-
-  document.getElementById("total").innerText = total;
-  document.getElementById("progressBar").style.width = (total/target*100)+"%";
-}
-
-// ===============================
-// SAVE DAY
-// ===============================
-function saveDay(){
-  let total = parseInt(document.getElementById("total").innerText);
-  data[ramadhanDayCount] = total;
-  localStorage.setItem("ramadhanData",JSON.stringify(data));
-  renderCalendar();
-  drawChart();
-  alert("Disimpan 🌙");
-}
-
-// ===============================
-// CALENDAR
-// ===============================
-function renderCalendar(){
-  const cal=document.getElementById("calendar");
-  cal.innerHTML="";
-
-  for(let i=1;i<=30;i++){
-    let div=document.createElement("div");
-    div.className="day";
-    div.innerText=i;
-
-    if(data[i] >= target) div.classList.add("completed");
-    if(i === ramadhanDayCount) div.classList.add("today");
-
-    cal.appendChild(div);
-  }
-}
-
-// ===============================
-// CHART
-// ===============================
-function drawChart(){
-  let canvas=document.getElementById("chart");
-  let ctx=canvas.getContext("2d");
-
-  ctx.clearRect(0,0,320,150);
-  ctx.beginPath();
-  ctx.moveTo(0,150);
-
-  for(let i=1;i<=30;i++){
-    let y=150-(data[i]||0);
-    ctx.lineTo(i*10,y);
-  }
-
-  ctx.strokeStyle="#7A9D8E";
-  ctx.stroke();
-}
-
-// ===============================
-// DATES
-// ===============================
-function showDates(){
-  document.getElementById("dateMasehi").innerText =
-  "📅 " + todayDate.toLocaleDateString("id-ID",{
-    weekday:"long",
-    day:"numeric",
-    month:"long",
-    year:"numeric"
-  });
-
-  document.getElementById("dateHijri").innerText =
-  "🌙 " + correctedHijriDay + " " + hijriMonths[hijriMonth-1] + " " + hijriYear + " H";
-
-  document.getElementById("ramadhanDay").innerText =
-  (hijriMonth === 9) ? "✨ Ramadhan Hari ke-" + correctedHijriDay : "";
-}
-
-// ===============================
-// INIT
-// ===============================
-showDates();
-renderActivities();
-renderCalendar();
-drawChart();
-
-                        </script>
+</body>
+</html>
